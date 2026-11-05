@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>طلبات</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #10b981;
+            --accent-hover: #059669;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            padding-bottom: 140px;
+        }
+        header {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            padding: 16px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+        h1 {
+            font-size: 1.25rem;
+            color: var(--accent);
+        }
+        .badge {
+            background: #334155;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            color: #e2e8f0;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+        .stat-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 8px;
+            text-align: center;
+        }
+        .stat-box.highlight {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.1);
+        }
+        .stat-label {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        .stat-val {
+            font-size: 1.15rem;
+            font-weight: bold;
+        }
+        .stat-box.highlight .stat-val {
+            color: var(--accent);
+        }
+        .stat-box.diff .stat-val {
+            color: var(--warning);
+        }
+
+        /* PS4 Timer Section */
+        .timer-card {
+            margin: 12px 16px;
+            background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
+            border-radius: 12px;
+            padding: 12px 16px;
+            border: 1px solid #3b82f6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .timer-info h3 {
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+            color: #93c5fd;
+        }
+        .timer-display {
+            font-size: 1.3rem;
+            font-weight: bold;
+            font-family: monospace;
+            letter-spacing: 1px;
+        }
+        .timer-controls {
+            display: flex;
+            gap: 6px;
+        }
+        .btn-timer {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            color: #fff;
+        }
+        .btn-start { background: #10b981; }
+        .btn-pause { background: #f59e0b; }
+        .btn-sync { background: #3b82f6; }
+
+        .mobile-note {
+            margin: 10px 16px 0;
+            padding: 10px 12px;
+            background: rgba(245, 158, 11, 0.10);
+            border: 1px solid #f59e0b;
+            border-radius: 10px;
+            color: #fde68a;
+            font-size: 0.78rem;
+            line-height: 1.6;
+        }
+        .timer-card { flex-wrap: wrap; gap: 10px; }
+        .timer-info { flex: 1 1 230px; }
+        .timer-manual {
+            margin-top: 10px;
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .timer-manual input {
+            width: 76px;
+            background: #0f172a;
+            border: 1px solid #3b82f6;
+            color: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+        }
+        .btn-manual {
+            background: #8b5cf6;
+            color: #fff;
+            border: none;
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+        .manual-note { font-size: 0.72rem; color:#bfdbfe; margin-top:6px; }
+        .btn-share { background:#22c55e; color:#06120a; }
+        .btn-copy { background:#3b82f6; color:#fff; }
+
+
+        /* Filter Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 16px;
+            scrollbar-width: none;
+        }
+        .tabs::-webkit-scrollbar { display: none; }
+        .tab {
+            background: var(--card-bg);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            font-weight: bold;
+            border-color: var(--accent);
+        }
+
+        /* Items List */
+        .items-container {
+            padding: 8px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .item-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: border-color 0.2s;
+        }
+        .item-card.active-item {
+            border-color: var(--accent);
+            background: rgba(16, 185, 129, 0.05);
+        }
+        .item-details {
+            flex: 1;
+        }
+        .item-name {
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .price-tag {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .our-price {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: 0.88rem;
+            cursor: pointer;
+            border-bottom: 1px dashed var(--accent);
+        }
+        .cafe-price {
+            text-decoration: line-through;
+            color: #ef4444;
+        }
+        .counter-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-qty {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            border: none;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-plus {
+            background: var(--accent);
+            color: #000;
+        }
+        .btn-minus {
+            background: #334155;
+            color: #fff;
+        }
+        .qty-val {
+            font-size: 1.2rem;
+            font-weight: bold;
+            min-width: 26px;
+            text-align: center;
+        }
+
+        /* Add Custom Item */
+        .custom-bar {
+            margin: 12px 16px;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+        .custom-bar h4 {
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+        .custom-inputs {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 6px;
+        }
+        .custom-inputs input {
+            background: #0f172a;
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            width: 100%;
+        }
+        .btn-add-custom {
+            background: var(--accent);
+            color: #000;
+            border: none;
+            padding: 0 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Bottom Floating Action Bar */
+        .bottom-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: #1e293b;
+            border-top: 1px solid var(--border);
+            padding: 12px 16px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+            box-shadow: 0 -4px 12px rgba(0,0,0,0.5);
+        }
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+        .btn-invoice {
+            background: var(--accent);
+            color: #000;
+            flex: 2;
+        }
+        .btn-reset {
+            background: #334155;
+            color: #f8fafc;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 200;
+            padding: 20px;
+            overflow-y: auto;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.open {
+            display: flex;
+        }
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 480px;
+            border-radius: 16px;
+            padding: 18px;
+            border: 1px solid var(--border);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+        .invoice-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 14px;
+            font-size: 0.85rem;
+        }
+        .invoice-table th, .invoice-table td {
+            padding: 8px 4px;
+            text-align: right;
+            border-bottom: 1px solid #334155;
+        }
+        .invoice-table th {
+            color: var(--text-muted);
+        }
+        .modal-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="header-top">
+        <h1>🧾 طلبات</h1>
+    </div>
+    <div class="summary-grid">
+        <div class="stat-box highlight">
+            <div class="stat-label">المطلوب دفعه</div>
+            <div class="stat-val" id="totalOur">0 ج</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-label">السعر قبل التعديل</div>
+            <div class="stat-val" id="totalCafe">0 ج</div>
+        </div>
+        <div class="stat-box diff">
+            <div class="stat-label">فرق الأسعار</div>
+            <div class="stat-val" id="totalDiff">0 ج</div>
+        </div>
+    </div>
+</header>
+
+<div class="mobile-note">
+    📱 على الموبايل: افتح الملف في <b>Chrome</b> على أندرويد أو <b>Safari</b> على iPhone، وليس داخل معاينة واتساب؛ معاينة واتساب قد تمنع أزرار JavaScript من العمل.
+</div>
+
+<div class="timer-card">
+    <div class="timer-info">
+        <h3>🎮 عداد بلايستيشن (60 ج/ساعة)</h3>
+        <div class="timer-display" id="psTimer">00:00:00</div>
+        <div class="timer-manual">
+            <input type="number" inputmode="numeric" id="manualHours" min="0" placeholder="ساعات">
+            <input type="number" inputmode="numeric" id="manualMinutes" min="0" placeholder="دقائق">
+            <button class="btn-manual" type="button" onclick="addManualTime()">+ وقت يدوي</button>
+        </div>
+        <div class="manual-note">لو شغلت العداد متأخر، أضف الوقت السابق هنا ثم كمل العداد عادي.</div>
+    </div>
+    <div class="timer-controls">
+        <button class="btn-timer btn-start" type="button" id="btnToggleTimer" onclick="toggleTimer()">تشغيل</button>
+        <button class="btn-timer btn-sync" type="button" onclick="syncTimerToPS()">+ أضف للفاتورة</button>
+    </div>
+</div>
+
+<div class="tabs" id="categoryTabs">
+    <button class="tab active" onclick="filterCategory('all', this)">الكل</button>
+    <button class="tab" onclick="filterCategory('shisha', this)">شيشة وبلايستيشن</button>
+    <button class="tab" onclick="filterCategory('hot', this)">مشروبات ساخنة</button>
+    <button class="tab" onclick="filterCategory('cold', this)">بارد وعصائر</button>
+    <button class="tab" onclick="filterCategory('active', this)">المطلوب حالياً (<span id="activeCount">0</span>)</button>
+</div>
+
+<div class="items-container" id="itemsList"></div>
+
+<div class="custom-bar">
+    <h4>➕ إضافة صنف جديد للقائمة (أو اضغط على السعر الأخضر لأي صنف لتعديله)</h4>
+    <div class="custom-inputs">
+        <input type="text" id="newName" placeholder="اسم الصنف">
+        <input type="number" id="newOurPrice" placeholder="السعر المعتمد">
+        <input type="number" id="newCafePrice" placeholder="السعر قبل التعديل">
+        <button class="btn-add-custom" onclick="addCustomItem()">إضافة</button>
+    </div>
+</div>
+
+<div class="bottom-bar">
+    <button class="btn-action btn-invoice" type="button" onclick="openInvoiceModal()">🧾 مراجعة الفاتورة</button>
+    <button class="btn-action btn-reset" type="button" onclick="resetSession()">تصفير الطلبات</button>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal" id="invoiceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>🧾 ملخص مراجعة الحساب</h3>
+            <button type="button" onclick="closeInvoiceModal()" style="background:none;border:none;color:#fff;font-size:1.2rem;cursor:pointer;">✕</button>
+        </div>
+        <div id="invoiceBody"></div>
+        <div class="modal-btns">
+            <button class="btn-action btn-share" type="button" onclick="shareToWhatsApp()">📲 إرسال واتساب</button>
+            <button class="btn-action btn-copy" type="button" onclick="copySummary()">📋 نسخ الملخص</button>
+            <button class="btn-action btn-reset" type="button" onclick="closeInvoiceModal()">إغلاق</button>
+        </div>
+    </div>
+</div>
+
+<script>
+const defaultItems = [
+    // شيشة وبلايستيشن
+    { id: 1, name: "حجر سلوم", cat: "shisha", ourPrice: 15, cafePrice: 15, qty: 0, note: "" },
+    { id: 2, name: "حجر شيشة فواكه", cat: "shisha", ourPrice: 75, cafePrice: 100, qty: 0, note: "100 ← 75" },
+    { id: 3, name: "بلاي ستيشن 4 (ساعة)", cat: "shisha", ourPrice: 60, cafePrice: 60, qty: 0, note: "سعر الساعة 60 ج" },
+
+    // مشروبات ساخنة
+    { id: 4, name: "شاي كشري", cat: "hot", ourPrice: 20, cafePrice: 20, qty: 0, note: "" },
+    { id: 5, name: "شاي عربي 2 استكانه", cat: "hot", ourPrice: 35, cafePrice: 45, qty: 0, note: "45 ← 35" },
+    { id: 6, name: "شاي قرنفل", cat: "hot", ourPrice: 25, cafePrice: 25, qty: 0, note: "" },
+    { id: 7, name: "شاي أخضر", cat: "hot", ourPrice: 25, cafePrice: 25, qty: 0, note: "" },
+    { id: 8, name: "قهوة تركي سادة", cat: "hot", ourPrice: 25, cafePrice: 30, qty: 0, note: "30 ← 25" },
+    { id: 9, name: "قهوة تركي مانو", cat: "hot", ourPrice: 25, cafePrice: 30, qty: 0, note: "30 ← 25" },
+    { id: 10, name: "قهوة فرنساوي مظبوط", cat: "hot", ourPrice: 30, cafePrice: 40, qty: 0, note: "40 ← 30" },
+    { id: 11, name: "اسبريسو سنجل", cat: "hot", ourPrice: 35, cafePrice: 35, qty: 0, note: "" },
+    { id: 12, name: "حمص شام", cat: "hot", ourPrice: 45, cafePrice: 50, qty: 0, note: "50 ← 45" },
+    { id: 13, name: "قرفة بالجنزبيل", cat: "hot", ourPrice: 30, cafePrice: 40, qty: 0, note: "40 ← 30" },
+    { id: 14, name: "قرفة جنزبيل بالحليب", cat: "hot", ourPrice: 35, cafePrice: 45, qty: 0, note: "45 ← 35" },
+    { id: 15, name: "كمون بليمون", cat: "hot", ourPrice: 25, cafePrice: 30, qty: 0, note: "30 ← 25" },
+    { id: 16, name: "حلبة", cat: "hot", ourPrice: 25, cafePrice: 30, qty: 0, note: "30 ← 25" },
+
+    // بارد وعصائر وحلويات
+    { id: 17, name: "مياه صغيرة", cat: "cold", ourPrice: 10, cafePrice: 10, qty: 0, note: "" },
+    { id: 18, name: "زبادي عسل", cat: "cold", ourPrice: 60, cafePrice: 70, qty: 0, note: "70 ← 60" },
+    { id: 19, name: "كوكتيل زبادي فواكه", cat: "cold", ourPrice: 65, cafePrice: 90, qty: 0, note: "90 ← 65" },
+    { id: 20, name: "كوكتيل باشون ميكس", cat: "cold", ourPrice: 65, cafePrice: 90, qty: 0, note: "90 ← 65" },
+    { id: 21, name: "بيبسي", cat: "cold", ourPrice: 25, cafePrice: 35, qty: 0, note: "35 ← 25" },
+    { id: 22, name: "ريد بول", cat: "cold", ourPrice: 75, cafePrice: 75, qty: 0, note: "" },
+    { id: 23, name: "افوكاتو", cat: "cold", ourPrice: 90, cafePrice: 100, qty: 0, note: "100 ← 90" },
+    { id: 24, name: "ميلك شيك فانيليا", cat: "cold", ourPrice: 100, cafePrice: 120, qty: 0, note: "120 ← 100" },
+    { id: 25, name: "تشيز كيك", cat: "cold", ourPrice: 80, cafePrice: 120, qty: 0, note: "120 ← 80" }
+];
+
+let items = JSON.parse(localStorage.getItem('orders_items_v3')) || defaultItems;
+let currentFilter = 'all';
+
+// Timer state
+let timerRunning = false;
+let timerStart = Number(localStorage.getItem('orders_timer_start_v3')) || 0;
+let timerElapsed = Number(localStorage.getItem('orders_timer_elapsed_v3')) || 0;
+let timerInterval = null;
+
+function saveState() {
+    localStorage.setItem('orders_items_v3', JSON.stringify(items));
+}
+
+function renderItems() {
+    const container = document.getElementById('itemsList');
+    container.innerHTML = '';
+
+    let totalOur = 0;
+    let totalCafe = 0;
+    let activeItemsCount = 0;
+
+    items.forEach(item => {
+        totalOur += item.qty * item.ourPrice;
+        totalCafe += item.qty * item.cafePrice;
+        if (item.qty > 0) activeItemsCount++;
+    });
+
+    document.getElementById('totalOur').innerText = totalOur + ' ج';
+    document.getElementById('totalCafe').innerText = totalCafe + ' ج';
+    document.getElementById('totalDiff').innerText = (totalCafe - totalOur) + ' ج';
+    document.getElementById('activeCount').innerText = activeItemsCount;
+
+    const filtered = items.filter(item => {
+        if (currentFilter === 'all') return true;
+        if (currentFilter === 'active') return item.qty > 0;
+        return item.cat === currentFilter;
+    });
+
+    filtered.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'item-card ' + (item.qty > 0 ? 'active-item' : '');
+        const hasDiff = item.ourPrice !== item.cafePrice;
+
+        card.innerHTML = `
+            <div class="item-details">
+                <div class="item-name">
+                    <span>${item.name}</span>
+                    ${item.qty > 0 ? `<span style="color:#10b981;font-size:0.85rem;">(${item.qty * item.ourPrice} ج)</span>` : ''}
+                </div>
+                <div class="price-tag">
+                    <span class="our-price" onclick="editItemPrice(${item.id})" title="اضغط لتعديل السعر">سعرنا: ${item.ourPrice} ج ✎</span>
+                    ${hasDiff ? `<span class="cafe-price">الفاتورة: ${item.cafePrice} ج</span>` : `<span>الفاتورة: ${item.cafePrice} ج</span>`}
+                    ${item.note ? `<span style="color:#f59e0b;font-size:0.72rem;">• ${item.note}</span>` : ''}
+                </div>
+            </div>
+            <div class="counter-controls">
+                <button class="btn-qty btn-minus" onclick="changeQty(${item.id}, -1)">-</button>
+                <div class="qty-val">${item.qty}</div>
+                <button class="btn-qty btn-plus" onclick="changeQty(${item.id}, 1)">+</button>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function changeQty(id, delta) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    item.qty = Math.max(0, Math.round((item.qty + delta) * 10) / 10);
+    saveState();
+    renderItems();
+}
+
+function editItemPrice(id) {
+    const item = items.find(i => i.id === id);
+    if (!item) return;
+    const newOur = prompt(`تعديل السعر المتفق عليه لـ "${item.name}":`, item.ourPrice);
+    if (newOur !== null && !isNaN(newOur) && newOur !== '') {
+        item.ourPrice = parseFloat(newOur);
+        saveState();
+        renderItems();
+    }
+}
+
+function filterCategory(cat, btn) {
+    currentFilter = cat;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderItems();
+}
+
+function addCustomItem() {
+    const name = document.getElementById('newName').value.trim();
+    const ourPrice = parseFloat(document.getElementById('newOurPrice').value);
+    const cafePrice = parseFloat(document.getElementById('newCafePrice').value || ourPrice);
+
+    if (!name || isNaN(ourPrice)) {
+        alert('ادخل اسم الصنف والسعر المتفق عليه');
+        return;
+    }
+    const newId = Date.now();
+    items.push({
+        id: newId,
+        name: name,
+        cat: 'cold',
+        ourPrice: ourPrice,
+        cafePrice: cafePrice,
+        qty: 1,
+        note: 'مضاف يدوياً'
+    });
+    document.getElementById('newName').value = '';
+    document.getElementById('newOurPrice').value = '';
+    document.getElementById('newCafePrice').value = '';
+    saveState();
+    renderItems();
+}
+
+function resetSession() {
+    if (confirm('هل متأكد من تصفير كل الطلبات والعداد لبدء حساب جديد؟')) {
+        items.forEach(i => i.qty = 0);
+        timerRunning = false;
+        clearInterval(timerInterval);
+        timerElapsed = 0;
+        localStorage.removeItem('orders_timer_start_v3');
+        localStorage.removeItem('orders_timer_elapsed_v3');
+        document.getElementById('psTimer').innerText = '00:00:00';
+        document.getElementById('btnToggleTimer').innerText = 'تشغيل';
+        saveState();
+        renderItems();
+    }
+}
+
+// Timer Functions
+function updateTimerDisplay() {
+    let totalMs = timerElapsed;
+    if (timerRunning) {
+        totalMs += (Date.now() - timerStart);
+    }
+    const totalSec = Math.floor(totalMs / 1000);
+    const hrs = String(Math.floor(totalSec / 3600)).padStart(2, '0');
+    const mins = String(Math.floor((totalSec % 3600) / 60)).padStart(2, '0');
+    const secs = String(totalSec % 60).padStart(2, '0');
+    document.getElementById('psTimer').innerText = `${hrs}:${mins}:${secs}`;
+}
+
+function toggleTimer() {
+    const btn = document.getElementById('btnToggleTimer');
+    if (!timerRunning) {
+        timerRunning = true;
+        timerStart = Date.now();
+        localStorage.setItem('orders_timer_start_v3', timerStart);
+        btn.innerText = 'إيقاف مؤقت';
+        btn.className = 'btn-timer btn-pause';
+        timerInterval = setInterval(updateTimerDisplay, 1000);
+    } else {
+        timerRunning = false;
+        timerElapsed += (Date.now() - timerStart);
+        localStorage.setItem('orders_timer_elapsed_v3', timerElapsed);
+        localStorage.removeItem('orders_timer_start_v3');
+        btn.innerText = 'استئناف';
+        btn.className = 'btn-timer btn-start';
+        clearInterval(timerInterval);
+    }
+}
+
+function addManualTime() {
+    const h = Math.max(0, parseInt(document.getElementById('manualHours').value || '0', 10) || 0);
+    const m = Math.max(0, parseInt(document.getElementById('manualMinutes').value || '0', 10) || 0);
+    const addedMs = (h * 60 + m) * 60000;
+    if (addedMs <= 0) {
+        alert('ادخل ساعات أو دقائق');
+        return;
+    }
+    timerElapsed += addedMs;
+    localStorage.setItem('orders_timer_elapsed_v3', timerElapsed);
+    document.getElementById('manualHours').value = '';
+    document.getElementById('manualMinutes').value = '';
+    updateTimerDisplay();
+}
+
+function syncTimerToPS() {
+    let totalMs = timerElapsed + (timerRunning ? (Date.now() - timerStart) : 0);
+    const hours = Math.round((totalMs / 3600000) * 100) / 100; // بالدقائق تقريبًا
+    if (hours <= 0) {
+        alert('التايمر لسه ماحسبش وقت');
+        return;
+    }
+    const psItem = items.find(i => i.id === 3);
+    if (psItem) {
+        psItem.qty = hours;
+        saveState();
+        renderItems();
+        alert(`تم تحديث عدد ساعات البلايستيشن إلى ${hours} ساعة`);
+    }
+}
+
+function openInvoiceModal() {
+    const active = items.filter(i => i.qty > 0);
+    const body = document.getElementById('invoiceBody');
+    if (active.length === 0) {
+        body.innerHTML = '<p style="text-align:center;padding:20px;color:#94a3b8;">لم يتم تسجيل أي طلبات حتى الآن.</p>';
+    } else {
+        let totalOur = 0, totalCafe = 0, totalCount = 0;
+        let rows = '';
+        active.forEach(i => {
+            const subOur = i.qty * i.ourPrice;
+            const subCafe = i.qty * i.cafePrice;
+            totalOur += subOur;
+            totalCafe += subCafe;
+            totalCount += i.qty;
+            rows += `
+                <tr>
+                    <td>${i.name}</td>
+                    <td>${i.qty}</td>
+                    <td style="color:#10b981;font-weight:bold;">${subOur} ج</td>
+                    <td style="color:#94a3b8;">${subCafe} ج</td>
+                </tr>
+            `;
+        });
+        body.innerHTML = `
+            <table class="invoice-table">
+                <thead>
+                    <tr>
+                        <th>الصنف</th>
+                        <th>العدد</th>
+                        <th>حسابنا</th>
+                        <th>الفاتورة</th>
+                    </tr>
+                </thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <div style="background:#0f172a;padding:12px;border-radius:10px;font-size:0.9rem;line-height:1.7;">
+                <div>📦 إجمالي عدد الوحدات (It. count): <strong>${totalCount}</strong></div>
+                <div>🧾 إجمالي السعر قبل التعديل: <strong>${totalCafe} ج</strong></div>
+                <div style="color:#10b981;font-size:1.05rem;">✅ <strong>المطلوب دفعه: ${totalOur} ج</strong></div>
+                <div style="color:#f59e0b;">💰 فرق الأسعار المستقطع: <strong>${totalCafe - totalOur} ج</strong></div>
+            </div>
+        `;
+    }
+    document.getElementById('invoiceModal').classList.add('open');
+}
+
+function closeInvoiceModal() {
+    document.getElementById('invoiceModal').classList.remove('open');
+}
+
+function buildSummaryText() {
+    const active = items.filter(i => i.qty > 0);
+    if (active.length === 0) return '';
+    const dateStr = new Date().toLocaleDateString('ar-EG');
+    let text = `🧾 *طلبات (${dateStr})*
+`;
+    text += `--------------------------
+`;
+    let totalOur = 0, totalCafe = 0;
+    active.forEach(i => {
+        const subOur = i.qty * i.ourPrice;
+        const subCafe = i.qty * i.cafePrice;
+        totalOur += subOur;
+        totalCafe += subCafe;
+        const qtyLabel = (i.id === 3) ? `${i.qty} ساعة` : i.qty;
+        text += `• ${i.name}: ${qtyLabel} × ${i.ourPrice}ج = *${subOur.toFixed(2).replace('.00','')} ج*
+`;
+    });
+    text += `--------------------------
+`;
+    text += `🧾 قبل التعديل: ${totalCafe.toFixed(2).replace('.00','')} ج
+`;
+    text += `✅ *المطلوب: ${totalOur.toFixed(2).replace('.00','')} ج*
+`;
+    text += `💰 فرق الأسعار: ${(totalCafe-totalOur).toFixed(2).replace('.00','')} ج`;
+    return text;
+}
+
+async function copySummary() {
+    const text = buildSummaryText();
+    if (!text) { alert('مفيش طلبات مسجلة'); return; }
+    try {
+        if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+        } else {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus(); ta.select();
+            const ok = document.execCommand('copy');
+            document.body.removeChild(ta);
+            if (!ok) throw new Error('copy failed');
+        }
+        alert('تم نسخ الملخص');
+    } catch (e) {
+        prompt('انسخ الملخص يدويًا:', text);
+    }
+}
+
+async function shareToWhatsApp() {
+    const text = buildSummaryText();
+    if (!text) { alert('مفيش طلبات مسجلة'); return; }
+    try {
+        if (navigator.share) {
+            await navigator.share({ title: 'طلبات', text });
+            return;
+        }
+    } catch (e) {
+        if (e && e.name === 'AbortError') return;
+    }
+    window.location.href = 'https://wa.me/?text=' + encodeURIComponent(text);
+}
+
+// Init
+if (timerStart > 0) {
+    timerRunning = true;
+    document.getElementById('btnToggleTimer').innerText = 'إيقاف مؤقت';
+    document.getElementById('btnToggleTimer').className = 'btn-timer btn-pause';
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+}
+updateTimerDisplay();
+renderItems();
+</script>
+
+</body>
+</html>
